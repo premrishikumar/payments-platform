@@ -19,3 +19,13 @@ logging:
   level:
     com.payments: DEBUG
     org.apache.kafka: WARN
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

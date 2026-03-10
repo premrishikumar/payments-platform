@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,9 +23,18 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<Payment> submitPayment(
-            @RequestHeader("Idempotency-Key") String idempotencyKey,
+    public ResponseEntity<?> submitPayment(
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @Valid @RequestBody Payment payment) {
+
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "status", 400,
+                            "message", "Idempotency-Key header is required"
+                    ));
+        }
+
         payment.setIdempotencyKey(idempotencyKey);
         log.info("POST /payments scheme={} idempotencyKey={}", payment.getScheme(), idempotencyKey);
         Payment result = paymentService.submitPayment(payment);
