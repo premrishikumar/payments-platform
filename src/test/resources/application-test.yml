@@ -2,40 +2,42 @@ spring:
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
+    username: sa
+    password:
   jpa:
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
   kafka:
-    bootstrap-servers: localhost:9093
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
     consumer:
       group-id: payments-test-group
       auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.payments.platform.domain"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.payments.platform.domain.Payment
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
 
 logging:
   level:
     com.payments: DEBUG
     org.apache.kafka: WARN
-
-management:
-  endpoint:
-    health:
-      show-details: always
-      show-components: always
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-
-management:
-  endpoint:
-    health:
-      show-details: always
-      show-components: always
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
+    org.springframework.kafka: WARN

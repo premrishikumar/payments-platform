@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 /**
  * Base class for integration tests.
  * Uses embedded Kafka — no external broker needed.
- * Each test class gets a fresh Spring context via @DirtiesContext.
+ * Spring auto-assigns broker address via ${spring.embedded.kafka.brokers}.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -17,9 +17,11 @@ import org.springframework.test.context.ActiveProfiles;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
     partitions = 1,
-    topics = {"payment.submitted", "payment.processed", "payment.failed"},
-    brokerProperties = {"listeners=PLAINTEXT://localhost:9093", "port=9093"}
+    topics = {
+        "payment.submitted",
+        "payment.processed",
+        "payment.failed"
+    }
 )
 public abstract class BaseIntegrationTest {
-    // Shared setup goes here
 }
